@@ -7,11 +7,14 @@ import { Heart, Sparkles, Cake, PartyPopper, ChevronDown, Gift } from "lucide-re
 const NAME = "Aura";              // nama teman ulang tahun
 const FROM_NAME = "Bagas";               // nama kamu (pengirim ucapan)
 const BIRTH_DATE = new Date(2005, 6, 13, 0, 0, 0); // 13 Juli 2005 (bulan: 0=Jan, jadi 6=Juli)
-const MESSAGE = `Dari kecil sampai sekarang, kamu selalu jadi orang yang bikin hari-hari terasa lebih ringan.
-Terima kasih sudah jadi kamu yang selalu ada, selalu tulus, dan selalu bikin orang di sekitarmu tersenyum.
-Semoga tahun ini membawa lebih banyak alasan untuk tertawa, lebih sedikit alasan untuk khawatir,
-dan semua mimpi yang selama ini kamu simpan diam-diam mulai menemukan jalannya.
-Selamat ulang tahun. Aku bersyukur banget punya kamu.`;
+const MESSAGE = `Selamat ulang tahun, Aura! 🥳
+
+Semoga di umur yang baru ini kamu selalu sehat, bahagia, dan semua yang kamu usahakan bisa tercapai. Jangan terlalu takut sama hal-hal yang kamu takuti, kadang semuanya nggak seburuk yang dibayangin.
+
+Terus, kurang-kurangin asbunnya, lebih produktif lagi, sama jangan keseringan main anonymous. Semoga tahun ini jadi tahun terbaik buat kamu. Semoga selalu dikelilingin orang baik
+
+Happy birthday! 🎂🎉
+`;
 
 /* ====================================================================== */
 
@@ -780,7 +783,7 @@ export default function BirthdayWebsite() {
         {!blown ? (
           <p className="cake-hint">(klik kuenya untuk meniup lilin)</p>
         ) : (
-          <p className="blown-msg">✨ Semoga semua harapanmu terkabul, {NAME}! ✨</p>
+          <p className="blown-msg">✨ Semoga yang disemogakan tersemogakan, {NAME}! ✨</p>
         )}
       </section>
 
