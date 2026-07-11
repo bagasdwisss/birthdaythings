@@ -5,15 +5,15 @@ import { Heart, Sparkles, Cake, PartyPopper, ChevronDown, Gift } from "lucide-re
    PENGATURAN — ganti bagian ini sesuai teman kamu ✨
    ====================================================================== */
 const NAME = "Aura";              // nama teman ulang tahun
-const FROM_NAME = "Bagas";               // nama kamu (pengirim ucapan)
+const FROM_NAME = "Bagas, A.Md.Kom";               // nama kamu (pengirim ucapan)
 const BIRTH_DATE = new Date(2005, 6, 13, 0, 0, 0); // 13 Juli 2005 (bulan: 0=Jan, jadi 6=Juli)
-const MESSAGE = `Selamat ulang tahun, Aura! 🥳
+const MESSAGE = `Selamat ulang tahun, Aura!
 
 Semoga di umur yang baru ini kamu selalu sehat, bahagia, dan semua yang kamu usahakan bisa tercapai. Jangan terlalu takut sama hal-hal yang kamu takuti, kadang semuanya nggak seburuk yang dibayangin.
 
-Terus, kurang-kurangin asbunnya, lebih produktif lagi, sama jangan keseringan main anonymous. Semoga tahun ini jadi tahun terbaik buat kamu. Semoga selalu dikelilingin orang baik
+Terus, kurang-kurangin asbunnya, lebih produktif lagi. Semoga tahun ini jadi tahun terbaik buat kamu. Semoga selalu dikelilingin orang baik
 
-Happy birthday! 🎂🎉
+Selamat Merayakan Hari Istimewamu.
 `;
 const REPLY_WHATSAPP = ""; // opsional: isi nomor WA Aura (format 62xxxxxxxxxx, tanpa + atau spasi) biar muncul tombol "Balas ucapan ini". Kosongkan untuk sembunyikan tombolnya.
 
@@ -797,7 +797,7 @@ export default function BirthdayWebsite() {
           <span className="name">{NAME}!</span>
         </h1>
         <p className="sub">
-          Sebuah taman kecil penuh bunga, khusus ditanam untuk merayakan hari kelahiranmu.
+          Seakan telah direncanakan sejak lama, semesta menghadirkan keindahannya hari ini untuk menyambut bertambahnya usiamu.
         </p>
         <div className="date-pill">
           <Cake size={18} color="#FFD166" />
@@ -952,7 +952,7 @@ export default function BirthdayWebsite() {
       </section>
 
       <footer>
-        Dibuat dengan <span className="heart"><Heart size={14} fill="currentColor" /></span> untuk {NAME}
+        Dibuat dengan seluruh niat untuk {NAME}
       </footer>
     </div>
   );
