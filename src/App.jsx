@@ -11,7 +11,7 @@ const MESSAGE = `Selamat ulang tahun, Aura!
 
 Semoga di umur yang baru ini kamu selalu sehat, bahagia, dan semua yang kamu usahakan bisa tercapai. Jangan terlalu takut sama hal-hal yang kamu takuti, kadang semuanya nggak seburuk yang dibayangin.
 
-Terus, kurang-kurangin asbunnya, lebih produktif lagi. Semoga tahun ini jadi tahun terbaik buat kamu. Semoga selalu dikelilingin orang baik
+Terus, kurang-kurangin asbunnya, lebih produktif lagi. Semoga tahun ini jadi tahun terbaik buat kamu. Semoga selalu dikelilingin orang baik.
 
 Selamat Merayakan Hari Istimewamu.
 `;
@@ -790,7 +790,7 @@ export default function BirthdayWebsite() {
         </div>
 
         <span className="eyebrow">
-          <Sparkles size={16} /> hari yang sudah lama ditunggu
+          <Sparkles size={16} /> Hari ketika dunia kembali merayakan kehadiranmu
         </span>
         <h1>
           Selamat Ulang Tahun
