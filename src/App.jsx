@@ -15,8 +15,11 @@ Terus, kurang-kurangin asbunnya, lebih produktif lagi, sama jangan keseringan ma
 
 Happy birthday! 🎂🎉
 `;
+const REPLY_WHATSAPP = ""; // opsional: isi nomor WA Aura (format 62xxxxxxxxxx, tanpa + atau spasi) biar muncul tombol "Balas ucapan ini". Kosongkan untuk sembunyikan tombolnya.
 
 /* ====================================================================== */
+
+const MESSAGE_PARAGRAPHS = MESSAGE.trim().split(/\n\s*\n/);
 
 function diffYMD(from, to) {
   let years = to.getFullYear() - from.getFullYear();
@@ -36,6 +39,45 @@ function diffYMD(from, to) {
 
 function pad(n) {
   return String(n).padStart(2, "0");
+}
+
+/* ---------- Scroll reveal (buat surat dibuka paragraf demi paragraf) ---------- */
+function useReveal(threshold = 0.35) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          obs.unobserve(el);
+        }
+      },
+      { threshold }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return [ref, inView];
+}
+
+function RevealParagraph({ text, index }) {
+  const [ref, inView] = useReveal(0.3);
+  return (
+    <p
+      ref={ref}
+      className={`letter-para${inView ? " in-view" : ""}`}
+      style={{ transitionDelay: `${index * 0.18}s` }}
+    >
+      {text}
+    </p>
+  );
 }
 
 const PETAL_EMOJI = ["🌸", "🌺", "🌼", "🌷", "💮", "🌻"];
@@ -101,9 +143,9 @@ function Flower({ size = 70, color = "#FF6F9C", centerColor = "#FFD166", delay =
   );
 }
 
-function StatCard({ label, value, icon }) {
+function StatCard({ label, value, icon, featured = false }) {
   return (
-    <div className="stat-card">
+    <div className={`stat-card${featured ? " featured" : ""}`}>
       <div className="stat-icon">{icon}</div>
       <div className="stat-value">{value}</div>
       <div className="stat-label">{label}</div>
@@ -115,11 +157,21 @@ export default function BirthdayWebsite() {
   const [now, setNow] = useState(new Date());
   const [blown, setBlown] = useState(false);
   const [confetti, setConfetti] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const statsRef = useRef(null);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    // sedikit delay biar transisi CSS sempat "ready" sebelum kelas is-loaded aktif
+    const raf = requestAnimationFrame(() => {
+      const t = setTimeout(() => setLoaded(true), 60);
+      return () => clearTimeout(t);
+    });
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   const petals = useMemo(
@@ -173,22 +225,22 @@ export default function BirthdayWebsite() {
   const cdSeconds = Math.floor((cdMs % 60000) / 1000);
 
   function handleBlow() {
-    const pieces = Array.from({ length: 40 }).map((_, i) => ({
+    const pieces = Array.from({ length: 70 }).map((_, i) => ({
       id: `${Date.now()}-${i}`,
-      left: 50 + (Math.random() * 60 - 30),
+      left: 50 + (Math.random() * 90 - 45),
       color: PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)],
-      delay: Math.random() * 0.3,
-      duration: 1.6 + Math.random() * 1.2,
+      delay: Math.random() * 0.35,
+      duration: 1.8 + Math.random() * 1.4,
       rotate: Math.random() * 360,
-      drift: Math.random() * 140 - 70,
-      size: 6 + Math.random() * 6,
+      drift: Math.random() * 220 - 110,
+      size: 6 + Math.random() * 7,
     }));
     setConfetti(pieces);
     setBlown(true);
   }
 
   return (
-    <div className="app">
+    <div className={`app${loaded ? " is-loaded" : ""}`}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Quicksand:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap');
 
@@ -230,7 +282,27 @@ export default function BirthdayWebsite() {
           pointer-events: none;
           overflow: hidden;
           z-index: 1;
+          opacity: 0;
+          transition: opacity 2.4s ease;
         }
+        .app.is-loaded .stars-layer, .app.is-loaded .petals-layer {
+          opacity: 1;
+          transition-delay: 0.4s;
+        }
+
+        /* ---------- Intro reveal: hero masuk bertahap, bukan langsung "meledak" ---------- */
+        .hero > * {
+          opacity: 0;
+          transform: translateY(18px);
+          transition: opacity .85s ease, transform .85s ease;
+        }
+        .app.is-loaded .hero > * { opacity: 1; transform: translateY(0); }
+        .app.is-loaded .hero > *:nth-child(1) { transition-delay: .05s; }
+        .app.is-loaded .hero > *:nth-child(2) { transition-delay: .35s; }
+        .app.is-loaded .hero > *:nth-child(3) { transition-delay: .5s; }
+        .app.is-loaded .hero > *:nth-child(4) { transition-delay: .68s; }
+        .app.is-loaded .hero > *:nth-child(5) { transition-delay: .82s; }
+        .app.is-loaded .hero > *:nth-child(6) { transition-delay: .95s; }
         .star {
           position: absolute;
           border-radius: 50%;
@@ -413,22 +485,44 @@ export default function BirthdayWebsite() {
           color: var(--cream-dim);
           margin-top: 0.5rem;
         }
+        .stats-featured {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: clamp(0.9rem, 2.4vw, 1.4rem);
+          margin-bottom: clamp(0.8rem, 2vw, 1.2rem);
+        }
         .stats-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-          gap: clamp(0.8rem, 2vw, 1.2rem);
+          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+          gap: clamp(0.7rem, 1.8vw, 1rem);
         }
+        /* ---------- Glassmorphism: stat cards ---------- */
         .stat-card {
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.18);
           border-radius: 20px;
-          padding: clamp(1.2rem, 3vw, 1.6rem) 1rem;
+          padding: clamp(1.1rem, 2.6vw, 1.5rem) 1rem;
           text-align: center;
-          transition: transform .25s ease, background .25s ease;
+          backdrop-filter: blur(16px) saturate(160%);
+          -webkit-backdrop-filter: blur(16px) saturate(160%);
+          box-shadow: 0 8px 32px rgba(20, 8, 40, 0.28), inset 0 1px 0 rgba(255,255,255,0.16);
+          transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
         }
         .stat-card:hover {
           transform: translateY(-4px);
-          background: rgba(255,255,255,0.08);
+          background: rgba(255,255,255,0.13);
+          box-shadow: 0 12px 40px rgba(20, 8, 40, 0.32), inset 0 1px 0 rgba(255,255,255,0.22);
+        }
+        .stat-card.featured {
+          padding: clamp(1.6rem, 4vw, 2.1rem) 1.2rem;
+          background: linear-gradient(160deg, rgba(255,111,156,0.2), rgba(177,131,244,0.16));
+          border: 1px solid rgba(255,255,255,0.26);
+          backdrop-filter: blur(22px) saturate(180%);
+          -webkit-backdrop-filter: blur(22px) saturate(180%);
+        }
+        .stat-card.featured .stat-value {
+          font-size: clamp(1.7rem, 4.6vw, 2.4rem);
+          text-shadow: 0 0 24px rgba(255,209,102,0.25);
         }
         .stat-icon { color: var(--pink-light); margin-bottom: 0.5rem; display: flex; justify-content: center; }
         .stat-value {
@@ -486,14 +580,17 @@ export default function BirthdayWebsite() {
           flex-wrap: wrap;
         }
 
-        /* ---------- Letter ---------- */
+        /* ---------- Letter (glassmorphism) ---------- */
         .letter {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.16);
           border-radius: 28px;
           padding: clamp(1.8rem, 5vw, 3.5rem);
           position: relative;
           overflow: hidden;
+          backdrop-filter: blur(22px) saturate(160%);
+          -webkit-backdrop-filter: blur(22px) saturate(160%);
+          box-shadow: 0 8px 40px rgba(20, 8, 40, 0.3), inset 0 1px 0 rgba(255,255,255,0.14);
         }
         .letter::before {
           content: '"';
@@ -505,7 +602,7 @@ export default function BirthdayWebsite() {
           color: rgba(255,111,156,0.15);
           line-height: 1;
         }
-        .letter p {
+        .letter-para {
           font-family: 'Caveat', cursive;
           font-size: clamp(1.3rem, 3.2vw, 1.75rem);
           line-height: 1.6;
@@ -513,6 +610,15 @@ export default function BirthdayWebsite() {
           white-space: pre-line;
           position: relative;
           z-index: 1;
+          margin: 0 0 1.1rem;
+          opacity: 0;
+          transform: translateY(16px);
+          transition: opacity .8s ease, transform .8s ease;
+        }
+        .letter-para:last-of-type { margin-bottom: 0; }
+        .letter-para.in-view {
+          opacity: 1;
+          transform: translateY(0);
         }
         .letter .sign {
           margin-top: 1.5rem;
@@ -520,6 +626,8 @@ export default function BirthdayWebsite() {
           font-family: 'Caveat', cursive;
           font-size: clamp(1.4rem, 3.6vw, 1.9rem);
           color: var(--pink-light);
+          position: relative;
+          z-index: 1;
         }
 
         /* ---------- Cake ---------- */
@@ -551,6 +659,28 @@ export default function BirthdayWebsite() {
           font-size: clamp(1.1rem, 3vw, 1.4rem);
           color: var(--marigold);
         }
+        .reply-cta {
+          margin-top: 1.2rem;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.65rem 1.4rem;
+          border-radius: 999px;
+          background: rgba(255,111,156,0.16);
+          border: 1px solid rgba(255,255,255,0.2);
+          backdrop-filter: blur(14px) saturate(160%);
+          -webkit-backdrop-filter: blur(14px) saturate(160%);
+          color: var(--cream);
+          font-weight: 600;
+          font-size: 0.92rem;
+          text-decoration: none;
+          transition: transform .2s ease, background .2s ease;
+        }
+        .reply-cta:hover {
+          transform: translateY(-2px);
+          background: rgba(255,111,156,0.26);
+        }
+        .reply-cta svg { color: var(--pink); }
 
         /* ---------- Confetti ---------- */
         .confetti-layer {
@@ -585,6 +715,11 @@ export default function BirthdayWebsite() {
         @media (prefers-reduced-motion: reduce) {
           .flower-bloom, .petal-shape, .flower-center, .petal-fall, .star, .scroll-cue svg, .flame {
             animation: none !important;
+          }
+          .hero > *, .stars-layer, .petals-layer, .letter-para {
+            transition: none !important;
+            opacity: 1 !important;
+            transform: none !important;
           }
         }
       `}</style>
@@ -695,13 +830,26 @@ export default function BirthdayWebsite() {
           <p>Dihitung langsung dari detik ke detik, sejak 13 Juli 2005.</p>
         </div>
 
+        <div className="stats-featured">
+          <StatCard
+            label="Perkiraan detak jantung"
+            value={heartbeats.toLocaleString("id-ID")}
+            icon={<Heart size={22} />}
+            featured
+          />
+          <StatCard
+            label="Purnama yang terlewati"
+            value={fullMoons.toLocaleString("id-ID")}
+            icon={<Sparkles size={22} />}
+            featured
+          />
+        </div>
+
         <div className="stats-grid">
-          <StatCard label="Total hari" value={totalDays.toLocaleString("id-ID")} icon={<Sparkles size={20} />} />
-          <StatCard label="Total minggu" value={totalWeeks.toLocaleString("id-ID")} icon={<Gift size={20} />} />
-          <StatCard label="Total jam" value={totalHours.toLocaleString("id-ID")} icon={<Sparkles size={20} />} />
-          <StatCard label="Total detik" value={totalSeconds.toLocaleString("id-ID")} icon={<Heart size={20} />} />
-          <StatCard label="Perkiraan detak jantung" value={heartbeats.toLocaleString("id-ID")} icon={<Heart size={20} />} />
-          <StatCard label="Purnama yang terlewati" value={fullMoons.toLocaleString("id-ID")} icon={<Sparkles size={20} />} />
+          <StatCard label="Total hari" value={totalDays.toLocaleString("id-ID")} icon={<Sparkles size={18} />} />
+          <StatCard label="Total minggu" value={totalWeeks.toLocaleString("id-ID")} icon={<Gift size={18} />} />
+          <StatCard label="Total jam" value={totalHours.toLocaleString("id-ID")} icon={<Sparkles size={18} />} />
+          <StatCard label="Total detik" value={totalSeconds.toLocaleString("id-ID")} icon={<Heart size={18} />} />
         </div>
       </section>
 
@@ -744,7 +892,9 @@ export default function BirthdayWebsite() {
           <h2>Sepucuk <span className="accent">surat kecil</span> untukmu</h2>
         </div>
         <div className="letter">
-          <p>{MESSAGE}</p>
+          {MESSAGE_PARAGRAPHS.map((para, i) => (
+            <RevealParagraph key={i} text={para} index={i} />
+          ))}
           <div className="sign">— {FROM_NAME}</div>
         </div>
       </section>
@@ -783,7 +933,21 @@ export default function BirthdayWebsite() {
         {!blown ? (
           <p className="cake-hint">(klik kuenya untuk meniup lilin)</p>
         ) : (
-          <p className="blown-msg">✨ Semoga yang disemogakan tersemogakan, {NAME}! ✨</p>
+          <>
+            <p className="blown-msg">✨ Semoga yang disemogakan tersemogakan, {NAME}! ✨</p>
+            {REPLY_WHATSAPP && (
+              <a
+                className="reply-cta"
+                href={`https://wa.me/${REPLY_WHATSAPP}?text=${encodeURIComponent(
+                  `Makasih ya ucapannya, ${FROM_NAME}! 🥹`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Heart size={16} fill="currentColor" /> Balas ucapan ini
+              </a>
+            )}
+          </>
         )}
       </section>
 
