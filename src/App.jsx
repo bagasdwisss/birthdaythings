@@ -7,7 +7,7 @@ import { Heart, Sparkles, Cake, PartyPopper, ChevronDown, Gift } from "lucide-re
 const NAME = "Aura";               // nama teman ulang tahun
 const FROM_NAME = "Bagas, A.Md.Kom";               // nama kamu (pengirim ucapan)
 const BIRTH_DATE = new Date(2005, 6, 13, 0, 0, 0); // 13 Juli 2005 (bulan: 0=Jan, jadi 6=Juli)
-const MESSAGE = `Selamat ulang tahun, Aura!
+const MESSAGE = `Selamat bertambah usia, Aura!
 
 Semoga di umur yang baru ini kamu selalu sehat, bahagia, dan semua yang kamu usahakan bisa tercapai. Jangan terlalu takut sama hal-hal yang kamu takuti, kadang semuanya nggak seburuk yang dibayangin.
 
