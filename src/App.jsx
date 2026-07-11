@@ -4,10 +4,10 @@ import { Heart, Sparkles, Cake, PartyPopper, ChevronDown, Gift } from "lucide-re
 /* ======================================================================
    PENGATURAN — ganti bagian ini sesuai teman kamu ✨
    ====================================================================== */
-const NAME = "Aura";              // nama teman ulang tahun
+const NAME = "Aura";               // nama teman ulang tahun
 const FROM_NAME = "Bagas, A.Md.Kom";               // nama kamu (pengirim ucapan)
 const BIRTH_DATE = new Date(2005, 6, 13, 0, 0, 0); // 13 Juli 2005 (bulan: 0=Jan, jadi 6=Juli)
-const MESSAGE = `Selamat ulang tahun, Aura!
+const MESSAGE = `Selamat bertambah usia, Aura!
 
 Semoga di umur yang baru ini kamu selalu sehat, bahagia, dan semua yang kamu usahakan bisa tercapai. Jangan terlalu takut sama hal-hal yang kamu takuti, kadang semuanya nggak seburuk yang dibayangin.
 
@@ -153,10 +153,58 @@ function StatCard({ label, value, icon, featured = false }) {
   );
 }
 
+/* ---------- Bloom-reveal wrapper: signature "mekar saat discroll" motion ---------- */
+function Bloom({ as: Tag = "div", className = "", children, ...rest }) {
+  const [ref, inView] = useReveal(0.18);
+  return (
+    <Tag ref={ref} className={`bloom${inView ? " in-view" : ""} ${className}`} {...rest}>
+      {children}
+    </Tag>
+  );
+}
+
+/* ---------- Divider ornament antar section ---------- */
+function Divider() {
+  return (
+    <div className="divider" aria-hidden="true">
+      <span className="divider-line" />
+      <Sparkles size={14} />
+      <span className="divider-line" />
+    </div>
+  );
+}
+
+/* ---------- Kembang api saat lilin ditiup ---------- */
+function Fireworks({ bursts }) {
+  if (!bursts.length) return null;
+  return (
+    <div className="fireworks-layer" aria-hidden="true">
+      {bursts.map((b) => (
+        <div key={b.id} className="firework-burst" style={{ left: `${b.x}%`, top: `${b.y}%` }}>
+          {b.particles.map((p, i) => (
+            <span
+              key={i}
+              className="firework-particle"
+              style={{
+                background: p.color,
+                color: p.color,
+                ["--fx"]: `${p.dx}px`,
+                ["--fy"]: `${p.dy}px`,
+                animationDelay: `${b.delay}s`,
+              }}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function BirthdayWebsite() {
   const [now, setNow] = useState(new Date());
   const [blown, setBlown] = useState(false);
   const [confetti, setConfetti] = useState([]);
+  const [fireworks, setFireworks] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const statsRef = useRef(null);
 
@@ -236,6 +284,29 @@ export default function BirthdayWebsite() {
       size: 6 + Math.random() * 7,
     }));
     setConfetti(pieces);
+
+    const burstOrigins = [
+      { x: 28, y: 32, delay: 0 },
+      { x: 72, y: 24, delay: 0.18 },
+      { x: 50, y: 42, delay: 0.34 },
+    ];
+    const bursts = burstOrigins.map((origin, bi) => ({
+      id: `${Date.now()}-${bi}`,
+      x: origin.x,
+      y: origin.y,
+      delay: origin.delay,
+      particles: Array.from({ length: 22 }).map((_, i) => {
+        const angle = (i / 22) * Math.PI * 2;
+        const radius = 60 + Math.random() * 50;
+        return {
+          dx: Math.cos(angle) * radius,
+          dy: Math.sin(angle) * radius,
+          color: PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)],
+        };
+      }),
+    }));
+    setFireworks(bursts);
+    setTimeout(() => setFireworks([]), 1800);
     setBlown(true);
   }
 
@@ -264,10 +335,34 @@ export default function BirthdayWebsite() {
           width: 100%;
           overflow-x: hidden;
           background:
+            radial-gradient(ellipse 90% 50% at 14% 12%, rgba(107,203,119,0.10) 0%, transparent 55%),
+            radial-gradient(ellipse 70% 45% at 88% 62%, rgba(255,111,156,0.12) 0%, transparent 60%),
             radial-gradient(ellipse 120% 60% at 50% 0%, var(--bg-glow) 0%, transparent 60%),
             linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-deep2) 45%, var(--bg-deep) 100%);
           color: var(--cream);
           font-family: 'Quicksand', sans-serif;
+          cursor: default;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        /* subtle film-grain + vignette for depth, sits above bg, below content */
+        .app::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          opacity: 0.5;
+          mix-blend-mode: overlay;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+        }
+        .app::after {
+          content: '';
+          position: fixed;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          background: radial-gradient(ellipse 80% 65% at 50% 45%, transparent 55%, rgba(12,6,24,0.55) 100%);
         }
 
         .app h1, .app h2, .app h3, .app .display {
@@ -303,6 +398,37 @@ export default function BirthdayWebsite() {
         .app.is-loaded .hero > *:nth-child(4) { transition-delay: .68s; }
         .app.is-loaded .hero > *:nth-child(5) { transition-delay: .82s; }
         .app.is-loaded .hero > *:nth-child(6) { transition-delay: .95s; }
+        
+        /* ---------- Bloom reveal: setiap section "mekar" saat masuk viewport ---------- */
+        .bloom {
+          opacity: 0;
+          transform: translateY(26px) scale(0.965) rotate(-0.6deg);
+          transition: opacity 1s cubic-bezier(.22,1,.36,1), transform 1s cubic-bezier(.22,1,.36,1);
+          will-change: transform, opacity;
+        }
+        .bloom.in-view {
+          opacity: 1;
+          transform: translateY(0) scale(1) rotate(0deg);
+        }
+
+        /* ---------- Divider ornament ---------- */
+        .divider {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.9rem;
+          max-width: 320px;
+          margin: 0 auto;
+          padding: 0 1.5rem;
+          color: var(--marigold);
+          opacity: 0.75;
+        }
+        .divider-line {
+          flex: 1;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(255,209,102,0.45), transparent);
+        }
+
         .star {
           position: absolute;
           border-radius: 50%;
@@ -421,17 +547,20 @@ export default function BirthdayWebsite() {
           line-height: 1.6;
         }
         .date-pill {
+          position: relative;
           display: inline-flex;
           align-items: center;
           gap: 0.6rem;
           padding: 0.6rem 1.3rem;
           border-radius: 999px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.16);
           backdrop-filter: blur(6px);
           font-weight: 600;
           font-size: clamp(0.85rem, 2vw, 1rem);
+          isolation: isolate;
         }
+
         .scroll-cue {
           margin-top: clamp(1.5rem, 4vw, 3rem);
           display: flex;
@@ -498,27 +627,27 @@ export default function BirthdayWebsite() {
         }
         /* ---------- Glassmorphism: stat cards ---------- */
         .stat-card {
-          background: rgba(255,255,255,0.08);
-          border: 1px solid rgba(255,255,255,0.18);
-          border-radius: 20px;
+          position: relative;
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.16);
+          border-radius: 22px;
           padding: clamp(1.1rem, 2.6vw, 1.5rem) 1rem;
           text-align: center;
-          backdrop-filter: blur(16px) saturate(160%);
-          -webkit-backdrop-filter: blur(16px) saturate(160%);
-          box-shadow: 0 8px 32px rgba(20, 8, 40, 0.28), inset 0 1px 0 rgba(255,255,255,0.16);
+          overflow: hidden;
+          backdrop-filter: blur(22px) saturate(160%);
+          -webkit-backdrop-filter: blur(22px) saturate(160%);
+          box-shadow: 0 8px 40px rgba(20, 8, 40, 0.3), inset 0 1px 0 rgba(255,255,255,0.14);
           transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
         }
         .stat-card:hover {
           transform: translateY(-4px);
-          background: rgba(255,255,255,0.13);
-          box-shadow: 0 12px 40px rgba(20, 8, 40, 0.32), inset 0 1px 0 rgba(255,255,255,0.22);
+          background: rgba(255,255,255,0.12);
+          box-shadow: 0 12px 44px rgba(20, 8, 40, 0.34), inset 0 1px 0 rgba(255,255,255,0.2);
         }
         .stat-card.featured {
           padding: clamp(1.6rem, 4vw, 2.1rem) 1.2rem;
           background: linear-gradient(160deg, rgba(255,111,156,0.2), rgba(177,131,244,0.16));
           border: 1px solid rgba(255,255,255,0.26);
-          backdrop-filter: blur(22px) saturate(180%);
-          -webkit-backdrop-filter: blur(22px) saturate(180%);
         }
         .stat-card.featured .stat-value {
           font-size: clamp(1.7rem, 4.6vw, 2.4rem);
@@ -638,7 +767,22 @@ export default function BirthdayWebsite() {
           margin-top: 1rem;
           cursor: pointer;
           user-select: none;
+          transition: transform .3s ease;
         }
+        .cake-wrap::before {
+          content: '';
+          position: absolute;
+          inset: -18%;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,209,102,0.28) 0%, transparent 70%);
+          animation: cakeGlow 2.6s ease-in-out infinite;
+          z-index: -1;
+        }
+        @keyframes cakeGlow {
+          0%, 100% { opacity: 0.5; transform: scale(0.92); }
+          50% { opacity: 0.9; transform: scale(1.05); }
+        }
+        .cake-wrap:hover { transform: scale(1.03); }
         .cake-svg { width: clamp(180px, 45vw, 260px); height: auto; display: block; }
         .flame {
           transform-origin: bottom center;
@@ -701,6 +845,34 @@ export default function BirthdayWebsite() {
           100% { transform: translate(var(--dx), 70vh) rotate(var(--rot)); opacity: 0; }
         }
 
+        /* ---------- Fireworks ---------- */
+        .fireworks-layer {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 55;
+          overflow: hidden;
+        }
+        .firework-burst {
+          position: absolute;
+          width: 0;
+          height: 0;
+        }
+        .firework-particle {
+          position: absolute;
+          top: 0; left: 0;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          box-shadow: 0 0 8px 1px currentColor;
+          animation: fireworkPop 1.1s cubic-bezier(.15,.7,.3,1) forwards;
+        }
+        @keyframes fireworkPop {
+          0% { transform: translate(0,0) scale(1); opacity: 1; }
+          75% { opacity: 1; }
+          100% { transform: translate(var(--fx), calc(var(--fy) + 40px)) scale(0.3); opacity: 0; }
+        }
+
         /* ---------- Footer ---------- */
         footer {
           text-align: center;
@@ -712,15 +884,36 @@ export default function BirthdayWebsite() {
         }
         footer .heart { color: var(--pink); display:inline-flex; vertical-align:-3px; }
 
+        /* ---------- Responsif: layar sangat sempit ---------- */
+        @media (max-width: 420px) {
+          .bouquet { transform: scale(0.8); margin-bottom: -0.5rem; }
+          .stats-featured { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+          .stats-grid { grid-template-columns: repeat(2, 1fr); }
+          .countdown-grid { gap: 0.5rem; }
+          .cd-box { min-width: 64px; padding: 0.8rem 0.6rem; }
+          .letter { padding: 1.4rem 1.1rem; border-radius: 22px; }
+          .letter::before { font-size: 5.5rem; }
+          .divider { max-width: 220px; }
+        }
+
+        /* ---------- Responsif: landscape pendek (mis. HP diputar) ---------- */
+        @media (max-height: 480px) and (orientation: landscape) {
+          .hero { min-height: auto; padding-top: 3rem; padding-bottom: 3rem; }
+          .bouquet { transform: scale(0.7); }
+          .scroll-cue { margin-top: 1rem; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
-          .flower-bloom, .petal-shape, .flower-center, .petal-fall, .star, .scroll-cue svg, .flame {
+          .flower-bloom, .petal-shape, .flower-center, .petal-fall, .star, .scroll-cue svg, .flame,
+          .cake-wrap::before, .firework-particle {
             animation: none !important;
           }
-          .hero > *, .stars-layer, .petals-layer, .letter-para {
+          .hero > *, .stars-layer, .petals-layer, .letter-para, .bloom {
             transition: none !important;
             opacity: 1 !important;
             transform: none !important;
           }
+          .fireworks-layer { display: none !important; }
         }
       `}</style>
 
@@ -757,6 +950,8 @@ export default function BirthdayWebsite() {
           </div>
         ))}
       </div>
+
+      <Fireworks bursts={fireworks} />
 
       {confetti.length > 0 && (
         <div className="confetti-layer">
@@ -815,7 +1010,7 @@ export default function BirthdayWebsite() {
 
       {/* STATS */}
       <section ref={statsRef}>
-        <div className="big-age">
+        <Bloom className="big-age">
           <div className="num">
             {years}
             <span style={{ fontSize: "0.4em", color: "var(--cream-dim)" }}> tahun</span>
@@ -823,49 +1018,51 @@ export default function BirthdayWebsite() {
           <div className="label">
             {months} bulan, {days} hari sudah kamu jalani sejak lahir
           </div>
-        </div>
+        </Bloom>
 
-        <div className="section-head">
-          <h2>Perjalanan hidupmu <span className="accent">sejauh ini</span></h2>
-          <p>Dihitung langsung dari detik ke detik, sejak 13 Juli 2005.</p>
-        </div>
+        <Bloom className="section-head">
+          <h2>Setiap detik, kamu sedang <span className="accent">menulis cerita</span></h2>
+          <p>Sejak detak pertama di 13 Juli 2005, semesta sudah mencatat semuanya.</p>
+        </Bloom>
 
-        <div className="stats-featured">
+        <Bloom className="stats-featured">
           <StatCard
-            label="Perkiraan detak jantung"
+            label="Kali jantungmu berdetak"
             value={heartbeats.toLocaleString("id-ID")}
             icon={<Heart size={22} />}
             featured
           />
           <StatCard
-            label="Purnama yang terlewati"
+            label="Purnama yang sudah kamu lewati"
             value={fullMoons.toLocaleString("id-ID")}
             icon={<Sparkles size={22} />}
             featured
           />
-        </div>
+        </Bloom>
 
-        <div className="stats-grid">
-          <StatCard label="Total hari" value={totalDays.toLocaleString("id-ID")} icon={<Sparkles size={18} />} />
-          <StatCard label="Total minggu" value={totalWeeks.toLocaleString("id-ID")} icon={<Gift size={18} />} />
-          <StatCard label="Total jam" value={totalHours.toLocaleString("id-ID")} icon={<Sparkles size={18} />} />
-          <StatCard label="Total detik" value={totalSeconds.toLocaleString("id-ID")} icon={<Heart size={18} />} />
-        </div>
+        <Bloom className="stats-grid">
+          <StatCard label="Hari yang sudah kamu jalani" value={totalDays.toLocaleString("id-ID")} icon={<Sparkles size={18} />} />
+          <StatCard label="Minggu yang sudah kamu lewati" value={totalWeeks.toLocaleString("id-ID")} icon={<Gift size={18} />} />
+          <StatCard label="Jam yang sudah kamu habiskan" value={totalHours.toLocaleString("id-ID")} icon={<Sparkles size={18} />} />
+          <StatCard label="Detik yang sudah kamu lalui" value={totalSeconds.toLocaleString("id-ID")} icon={<Heart size={18} />} />
+        </Bloom>
       </section>
+
+      <Divider />
 
       {/* COUNTDOWN */}
       <section className="countdown-wrap">
-        <div className="section-head">
+        <Bloom className="section-head">
           <h2>{isToday ? "Sekarang adalah harinya! 🎉" : "Menuju hari spesial berikutnya"}</h2>
           {!isToday && <p>Hitung mundur menuju ulang tahunmu selanjutnya.</p>}
-        </div>
+        </Bloom>
 
         {isToday ? (
-          <div className="today-banner">
+          <Bloom className="today-banner">
             <PartyPopper color="#FFD166" /> Selamat ulang tahun, hari ini harimu! <PartyPopper color="#FFD166" />
-          </div>
+          </Bloom>
         ) : (
-          <div className="countdown-grid">
+          <Bloom className="countdown-grid">
             <div className="cd-box">
               <div className="cd-num">{cdDays}</div>
               <div className="cd-label">Hari</div>
@@ -882,28 +1079,32 @@ export default function BirthdayWebsite() {
               <div className="cd-num">{pad(cdSeconds)}</div>
               <div className="cd-label">Detik</div>
             </div>
-          </div>
+          </Bloom>
         )}
       </section>
 
+      <Divider />
+
       {/* LETTER */}
       <section>
-        <div className="section-head">
+        <Bloom className="section-head">
           <h2>Sepucuk <span className="accent">surat kecil</span> untukmu</h2>
-        </div>
-        <div className="letter">
+        </Bloom>
+        <Bloom className="letter">
           {MESSAGE_PARAGRAPHS.map((para, i) => (
             <RevealParagraph key={i} text={para} index={i} />
           ))}
           <div className="sign">— {FROM_NAME}</div>
-        </div>
+        </Bloom>
       </section>
+
+      <Divider />
 
       {/* CAKE */}
       <section className="cake-section">
-        <div className="section-head">
+        <Bloom className="section-head">
           <h2>Tiup lilinnya, buat satu harapan 🕯️</h2>
-        </div>
+        </Bloom>
 
         <div className="cake-wrap" onClick={handleBlow}>
           <svg viewBox="0 0 200 180" className="cake-svg">
