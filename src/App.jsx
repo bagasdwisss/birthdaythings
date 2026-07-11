@@ -4,8 +4,8 @@ import { Heart, Sparkles, Cake, PartyPopper, ChevronDown, Gift } from "lucide-re
 /* ======================================================================
    PENGATURAN — ganti bagian ini sesuai teman kamu ✨
    ====================================================================== */
-const NAME = "Sahabatku";              // nama teman ulang tahun
-const FROM_NAME = "Aku";               // nama kamu (pengirim ucapan)
+const NAME = "Aura";              // nama teman ulang tahun
+const FROM_NAME = "Bagas";               // nama kamu (pengirim ucapan)
 const BIRTH_DATE = new Date(2005, 6, 13, 0, 0, 0); // 13 Juli 2005 (bulan: 0=Jan, jadi 6=Juli)
 const MESSAGE = `Dari kecil sampai sekarang, kamu selalu jadi orang yang bikin hari-hari terasa lebih ringan.
 Terima kasih sudah jadi kamu yang selalu ada, selalu tulus, dan selalu bikin orang di sekitarmu tersenyum.
