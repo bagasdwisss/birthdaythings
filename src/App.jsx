@@ -7,7 +7,7 @@ import { Heart, Sparkles, Cake, PartyPopper, ChevronDown, Gift } from "lucide-re
 const NAME = "Aura";               // nama teman ulang tahun
 const FROM_NAME = "Bagas, A.Md.Kom";               // nama kamu (pengirim ucapan)
 const BIRTH_DATE = new Date(2005, 6, 13, 0, 0, 0); // 13 Juli 2005 (bulan: 0=Jan, jadi 6=Juli)
-const MESSAGE = `Selamat bertambah usia, Aura!
+const MESSAGE = `Selamat ulang tahun, Aura!
 
 Semoga di umur yang baru ini kamu selalu sehat, bahagia, dan semua yang kamu usahakan bisa tercapai. Jangan terlalu takut sama hal-hal yang kamu takuti, kadang semuanya nggak seburuk yang dibayangin.
 
@@ -214,7 +214,6 @@ export default function BirthdayWebsite() {
   }, []);
 
   useEffect(() => {
-    // sedikit delay biar transisi CSS sempat "ready" sebelum kelas is-loaded aktif
     const raf = requestAnimationFrame(() => {
       const t = setTimeout(() => setLoaded(true), 60);
       return () => clearTimeout(t);
@@ -385,7 +384,7 @@ export default function BirthdayWebsite() {
           transition-delay: 0.4s;
         }
 
-        /* ---------- Intro reveal: hero masuk bertahap, bukan langsung "meledak" ---------- */
+        /* ---------- Intro reveal: hero masuk bertahap ---------- */
         .hero > * {
           opacity: 0;
           transform: translateY(18px);
@@ -398,7 +397,7 @@ export default function BirthdayWebsite() {
         .app.is-loaded .hero > *:nth-child(4) { transition-delay: .68s; }
         .app.is-loaded .hero > *:nth-child(5) { transition-delay: .82s; }
         .app.is-loaded .hero > *:nth-child(6) { transition-delay: .95s; }
-        
+
         /* ---------- Bloom reveal: setiap section "mekar" saat masuk viewport ---------- */
         .bloom {
           opacity: 0;
@@ -547,20 +546,17 @@ export default function BirthdayWebsite() {
           line-height: 1.6;
         }
         .date-pill {
-          position: relative;
           display: inline-flex;
           align-items: center;
           gap: 0.6rem;
           padding: 0.6rem 1.3rem;
           border-radius: 999px;
-          background: rgba(255,255,255,0.07);
-          border: 1px solid rgba(255,255,255,0.16);
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.12);
           backdrop-filter: blur(6px);
           font-weight: 600;
           font-size: clamp(0.85rem, 2vw, 1rem);
-          isolation: isolate;
         }
-
         .scroll-cue {
           margin-top: clamp(1.5rem, 4vw, 3rem);
           display: flex;
@@ -625,45 +621,48 @@ export default function BirthdayWebsite() {
           grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
           gap: clamp(0.7rem, 1.8vw, 1rem);
         }
+        
         /* ---------- Glassmorphism: stat cards ---------- */
         .stat-card {
           position: relative;
           background: rgba(255,255,255,0.07);
           border: 1px solid rgba(255,255,255,0.16);
           border-radius: 22px;
-          padding: clamp(1.1rem, 2.6vw, 1.5rem) 1rem;
+          padding: clamp(1rem, 2.6vw, 1.5rem) clamp(0.6rem, 2vw, 1rem);
           text-align: center;
-          overflow: hidden;
           backdrop-filter: blur(22px) saturate(160%);
           -webkit-backdrop-filter: blur(22px) saturate(160%);
           box-shadow: 0 8px 40px rgba(20, 8, 40, 0.3), inset 0 1px 0 rgba(255,255,255,0.14);
-          transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+          transition: transform .25s ease;
         }
         .stat-card:hover {
           transform: translateY(-4px);
-          background: rgba(255,255,255,0.12);
-          box-shadow: 0 12px 44px rgba(20, 8, 40, 0.34), inset 0 1px 0 rgba(255,255,255,0.2);
         }
         .stat-card.featured {
-          padding: clamp(1.6rem, 4vw, 2.1rem) 1.2rem;
-          background: linear-gradient(160deg, rgba(255,111,156,0.2), rgba(177,131,244,0.16));
-          border: 1px solid rgba(255,255,255,0.26);
+          padding: clamp(1.4rem, 4vw, 2.1rem) 1rem;
+          background: linear-gradient(160deg, rgba(255,111,156,0.18), rgba(177,131,244,0.15));
         }
         .stat-card.featured .stat-value {
-          font-size: clamp(1.7rem, 4.6vw, 2.4rem);
+          font-size: clamp(1.5rem, 5vw, 2.4rem);
           text-shadow: 0 0 24px rgba(255,209,102,0.25);
         }
         .stat-icon { color: var(--pink-light); margin-bottom: 0.5rem; display: flex; justify-content: center; }
+        
+        /* Handling large numbers responsive text (828.264.005 dsb) */
         .stat-value {
           font-family: 'Fredoka', sans-serif;
-          font-size: clamp(1.3rem, 3.4vw, 1.8rem);
+          font-size: clamp(1rem, 4vw, 1.8rem); /* Diperkecil batas bawahnya */
           font-weight: 600;
           color: var(--cream);
+          word-break: break-word; /* Angka panjang akan diputus agar tidak meluber */
+          overflow-wrap: anywhere;
+          line-height: 1.1;
         }
+        
         .stat-label {
           font-size: 0.8rem;
           color: var(--cream-dim2);
-          margin-top: 0.3rem;
+          margin-top: 0.5rem;
           letter-spacing: 0.03em;
         }
 
@@ -887,7 +886,7 @@ export default function BirthdayWebsite() {
         /* ---------- Responsif: layar sangat sempit ---------- */
         @media (max-width: 420px) {
           .bouquet { transform: scale(0.8); margin-bottom: -0.5rem; }
-          .stats-featured { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+          .stats-featured { grid-template-columns: 1fr; } /* Ditumpuk lurus agar tidak menyempitkan angka panjang */
           .stats-grid { grid-template-columns: repeat(2, 1fr); }
           .countdown-grid { gap: 0.5rem; }
           .cd-box { min-width: 64px; padding: 0.8rem 0.6rem; }
@@ -985,7 +984,7 @@ export default function BirthdayWebsite() {
         </div>
 
         <span className="eyebrow">
-          <Sparkles size={16} /> Hari ketika dunia kembali merayakan kehadiranmu
+          Hari ketika dunia kembali merayakan kehadiranmu
         </span>
         <h1>
           Selamat Ulang Tahun
